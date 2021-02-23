@@ -5,7 +5,7 @@
     <link>/post/</link>
       <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     <description>Posts</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><lastBuildDate>Mon, 15 Feb 2021 00:00:00 +0000</lastBuildDate>
     <image>
       <url>/images/icon_hu0c98fbea8969f00857be97a7518ef2c4_11769_512x512_fill_lanczos_center_2.png</url>
       <title>Posts</title>
@@ -14,16 +14,22 @@
     
     <item>
       <title>Dibuixant les eleccions 14F</title>
-      <link>/post/mapes14f/14fparlament/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>/post/mapes14f/14fparlament/</guid>
+      <link>/post/mapa14f/mapa14f/</link>
+      <pubDate>Mon, 15 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>/post/mapa14f/mapa14f/</guid>
       <description>
 
 
+&lt;p&gt;L’objectiu d’aquesta primera entrada al blog és demostrar com fer mapes electorals amb R de manera senzilla i intuïtiva en català, tenint en compte que la majoria de tutorials disponibles són en anglès. Si t’ha sigut útil o creus que es pot millorat estaré encantat de llegir-te als comentaris o per les xarxes socials!&lt;/p&gt;
 &lt;div id=&#34;importar-les-dades&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;1. Importar les dades&lt;/h1&gt;
+&lt;p&gt;Primer cal carregar (i instal·lar si no ho estan ja) els diferents paquets que necessitem:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(sf)       #Per dibuixar els mapes
+library(tidyverse)#Facilita el tractament de dades
+library(RSocrata) #Per importar dades de Dades Obertes
+library(patchwork)#Permet combinar imatges (mapes en aquest cas)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Per tal de treballar amb les dades, he descarregat de l’INE un fitxer ZIP amb les &lt;a href=&#34;https://www.ine.es/ss/Satellite?c=Page&amp;amp;cid=1259952026632&amp;amp;p=1259952026632&amp;amp;pagename=ProductosYServicios%2FPYSLayout&#34;&gt;dades actualitzades&lt;/a&gt; de les seccions censals (canvien entre eleccions segons el nombre d’habitants). Aquest fitxer està en format SHP i l’importo amb el paquet “sf” i la funció “st_read”.&lt;/p&gt;
-&lt;p&gt;Seguidament creo una variable que identifiqui cada secció censal de manera única, i conservo aquesta variable (“uniqueID”) i “geometry”, que contC) la informació necessària per fer el mapa.&lt;/p&gt;
+&lt;p&gt;Seguidament creo una variable que identifiqui cada secció censal de manera única, i conservo aquesta variable (“uniqueID”) i “geometry”, que conté la informació necessària per fer el mapa.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cat2020 &amp;lt;- sf::st_read(paste0(getwd(),&amp;quot;/seccionado_2020&amp;quot;))%&amp;gt;%
   filter(NCA==&amp;quot;Cataluña&amp;quot;)%&amp;gt;%
   mutate(CSEC=as.numeric(CSEC),
@@ -32,45 +38,45 @@
          CMUN=as.numeric(CMUN),
          uniqueID=paste0(CPRO, CMUN, CDIS, CSEC))%&amp;gt;%
   select(uniqueID, geometry)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## Reading layer `SECC_CE_20200101&amp;#39; from data source `G:\Mi unidad\Personal\Coses\blog1\content\post\Mapes14f\seccionado_2020&amp;#39; using driver `ESRI Shapefile&amp;#39;
-## Simple feature collection with 36309 features and 20 fields
+&lt;pre&gt;&lt;code&gt;## Reading layer `cat2020&amp;#39; from data source `G:\Mi unidad\Personal\Coses\blog1\content\post\mapa14f\seccionado_2020&amp;#39; using driver `ESRI Shapefile&amp;#39;
+## Simple feature collection with 5073 features and 20 fields
 ## geometry type:  MULTIPOLYGON
 ## dimension:      XY
-## bbox:           xmin: -1004502 ymin: 3132130 xmax: 1126932 ymax: 4859240
+## bbox:           xmin: 766711.2 ymin: 4491739 xmax: 1021923 ymax: 4752095
 ## projected CRS:  ETRS89 / UTM zone 30N&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;A continuació importo les dades de vot directament del &lt;a href=&#34;https://analisi.transparenciacatalunya.cat/Societat-benestar/Eleccions-al-Parlament-de-Catalunya-2021-Recompte-/ix2p-vyw4&#34;&gt;portal Dades Obertes de la Generalitat&lt;/a&gt;. Fer-ho d’aquesta manera permet tenir les dades actualitzades en tot moment i no haver de descarregar cap fitxer manualment. Per poder-ho fer servir, però, cal crear un compte. Com en el fitxer amb les dades geogràfiques, creo també la variable “uniqueID” i uneix les dues bases de dades amb la funció “left_join”.&lt;/p&gt;
-&lt;p&gt;La funció “plot(st_geometry())” permet comprovar que les dades són correctes i hem ajuntat bé les dues bases de dades.&lt;/p&gt;
+&lt;p&gt;A continuació importo les dades de vot directament del &lt;a href=&#34;https://analisi.transparenciacatalunya.cat/Societat-benestar/Eleccions-al-Parlament-de-Catalunya-2021-Recompte-/ix2p-vyw4&#34;&gt;portal Dades Obertes de la Generalitat&lt;/a&gt;. Fer-ho d’aquesta manera permet tenir les dades actualitzades en tot moment i no haver de descarregar cap fitxer manualment. Per poder-ho fer servir, però, cal crear un compte i introduir als espais en blanc de l’script el correu-e i la contrasenya. Com en el fitxer amb les dades geogràfiques, creo també la variable “uniqueID” i uneix les dues bases de dades amb la funció “left_join”.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;df &amp;lt;- read.socrata(
   &amp;quot;https://analisi.transparenciacatalunya.cat/resource/ix2p-vyw4.json&amp;quot;,
   email     = &amp;quot;&amp;quot;,
   password  = &amp;quot;&amp;quot;)%&amp;gt;%
   mutate(uniqueID=paste0(codi_circumscripci, codi_municipi, districte, secci))&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;joined &amp;lt;- left_join(cat2020, df)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;La funció “plot(st_geometry())” permet comprovar que les dades són correctes i hem ajuntat bé les dues bases de dades.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;joint &amp;lt;- left_join(cat2020, df)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## Joining, by = &amp;quot;uniqueID&amp;quot;&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot(st_geometry(joined))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/Mapes14f/14fparlament_files/figure-html/merge_data-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot(st_geometry(joint))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/mapa14f/mapa14f_files/figure-html/merge_data-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;dibuixar-els-mapes&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;2. Dibuixar els mapes&lt;/h1&gt;
 &lt;p&gt;Un cop tenim les dades, fem servir el paquet ggplot (dins de tidyverse) per fer els mapes. Definim els colors de cada partit i el títol.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PSC &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PSC&amp;lt;- ggplot() +
+  geom_sf(data = joint, aes(
     fill = as.numeric(partit_dels_socialistes_de),
     color = as.numeric(partit_dels_socialistes_de)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#e73b39&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#e73b39&amp;quot;, guide=FALSE)+
   labs(title=&amp;quot;PSC&amp;quot;)+
   theme_void()
 
-ERC &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+ERC&amp;lt;- ggplot() +
+  geom_sf(data = joint, aes(
     fill = as.numeric(esquerra_republicana_de),
     color = as.numeric(esquerra_republicana_de)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#ffee00&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#ffee00&amp;quot;, guide=FALSE)+
@@ -78,11 +84,11 @@ ERC &amp;lt;- ggplot() +
   theme_void()
 
 JXCAT &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+  geom_sf(data = joint, aes(
     fill = as.numeric(junts_per_catalunya_jxcat),
     color = as.numeric(junts_per_catalunya_jxcat)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#00c5b3&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#00c5b3&amp;quot;, guide=FALSE)+
@@ -90,11 +96,11 @@ JXCAT &amp;lt;- ggplot() +
   theme_void()
 
 VOX &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+  geom_sf(data = joint, aes(
     fill = as.numeric(vox_vox),
     color = as.numeric(vox_vox)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#77b82a&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#77b82a&amp;quot;, guide=FALSE)+
@@ -102,11 +108,11 @@ VOX &amp;lt;- ggplot() +
   theme_void()
 
 CUP &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+  geom_sf(data = joint, aes(
     fill = as.numeric(candidatura_d_unitat_popular),
     color = as.numeric(candidatura_d_unitat_popular)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#fff200&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#fff200&amp;quot;, guide=FALSE)+
@@ -114,23 +120,23 @@ CUP &amp;lt;- ggplot() +
   theme_void()
 
 COMUNS &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+  geom_sf(data = joint, aes(
     fill = as.numeric(en_com_podem_podem_en_com),
     color = as.numeric(en_com_podem_podem_en_com)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#581866&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#581866&amp;quot;, guide=FALSE)+
-  labs(title=&amp;quot;En ComC: Podem&amp;quot;)+
+  labs(title=&amp;quot;En Comú Podem&amp;quot;)+
   theme_void()
 
 CS &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+  geom_sf(data = joint, aes(
     fill = as.numeric(ciutadans_partido_de_la),
     color = as.numeric(ciutadans_partido_de_la)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#ff5001&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#ff5001&amp;quot;, guide=FALSE)+
@@ -138,11 +144,11 @@ CS &amp;lt;- ggplot() +
   theme_void()
 
 PP &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+  geom_sf(data = joint, aes(
     fill = as.numeric(partit_popular_partido_popular),
     color = as.numeric(partit_popular_partido_popular)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#0d386c&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#0d386c&amp;quot;, guide=FALSE)+
@@ -150,23 +156,23 @@ PP &amp;lt;- ggplot() +
   theme_void()
 
 PDCAT &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+  geom_sf(data = joint, aes(
     fill = as.numeric(partit_dem_crata_europeu),
     color = as.numeric(partit_dem_crata_europeu)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#005ca9&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#005ca9&amp;quot;, guide=FALSE)+
   labs(title=&amp;quot;PDeCAT&amp;quot;)+
   theme_void()
 
-FNC &amp;lt;- ggplot() +
-  geom_sf(data = joined, aes(
+FNC&amp;lt;- ggplot() +
+  geom_sf(data = joint, aes(
     fill = as.numeric(front_nacional_de_catalunya),
     color = as.numeric(front_nacional_de_catalunya)
     )) +
-  coord_sf(crs = st_crs(joined), datum = NA) +
+  coord_sf(crs = st_crs(joint), datum = NA) +
   scale_fill_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#005ca9&amp;quot;, breaks=c(0,25,50, 75),
                          labels=c(&amp;quot;0%&amp;quot;,&amp;quot;25%&amp;quot;, &amp;quot;50%&amp;quot;, &amp;quot;75%&amp;quot;), &amp;quot;% de vots&amp;quot;)+
   scale_color_gradient(low = &amp;quot;white&amp;quot;, high = &amp;quot;#005ca9&amp;quot;, guide=FALSE)+
@@ -174,15 +180,16 @@ FNC &amp;lt;- ggplot() +
   theme_void()&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Un cop guardats els mapes, fem servir el paquet “patchwork” que permet integrar diferents gràfics en una mateixa imatge de manera molt senzilla i prou resolutiva.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;PSC+ERC+JXCAT+VOX+CUP+COMUNS+CS+PP&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/Mapes14f/14fparlament_files/figure-html/mapes_patch-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;div id=&#34;enllaços-dinterès&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Enllaços d’interès:&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;Geocomputation with R: &lt;a href=&#34;https://geocompr.robinlovelace.net/&#34; class=&#34;uri&#34;&gt;https://geocompr.robinlovelace.net/&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;From Data to Viz: &lt;a href=&#34;https://www.data-to-viz.com/&#34; class=&#34;uri&#34;&gt;https://www.data-to-viz.com/&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Blog d’en Toni Rodon: &lt;a href=&#34;http://www.tonirodon.cat/wp-content/uploads/2020/06/Tutorial-Mapes.html&#34; class=&#34;uri&#34;&gt;http://www.tonirodon.cat/wp-content/uploads/2020/06/Tutorial-Mapes.html&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&#34;/post/mapa14f/mapa14f_files/figure-html/mapes_patch-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
+&lt;div id=&#34;enllaços-dinterès&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;3. Enllaços d’interès:&lt;/h1&gt;
+&lt;p&gt;Per tal de fer aquest post he anat agafant informació i fragments d’aquí i d’allà:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://geocompr.robinlovelace.net/&#34;&gt;Geocomputation with R&lt;/a&gt;: Aquest recurs és clau per introduïr-se sistemes d’informació geogràfica en R. És en anglès però molt assequible (tot i que complex!).&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.data-to-viz.com/&#34;&gt;From Data to Viz&lt;/a&gt;: Receptari de recursos sobre com construir gràfics en R i D3. Molt intuitiu, senzill i complet.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.tonirodon.cat/wp-content/uploads/2020/06/Tutorial-Mapes.html&#34;&gt;Blog d’en Toni Rodon&lt;/a&gt;: Recurs molt interessant en temes de mapes i introducció a R en general.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/div&gt;
 </description>
     </item>
